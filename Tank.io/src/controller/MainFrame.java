@@ -4,8 +4,12 @@
  */
 package controller;
 
+import java.awt.Toolkit;
 import javax.swing.Timer;
+import jdk.jshell.execution.Util;
+import model.Game;
 import model.Player;
+import model.Utils;
 
 /**
  *
@@ -16,18 +20,19 @@ public class MainFrame extends javax.swing.JFrame {
     /**
      * Creates new form MainFrame
      */
+    private Game game;
     private Player player; 
     private Timer timer;
     public MainFrame() {
         initComponents();
-        player = new Player(drawPanel1.getWidth()/2,drawPanel1.getHeight()/2);
-        drawPanel1.setPlayer(player);
         timer = new Timer(20,evt-> updateView());
-        System.out.print("start");
-        timer.start();
+        // makes window fullscreen
+        setExtendedState(MAXIMIZED_BOTH);
     }
 
     private void updateView(){
+        // Checks for hits and repaints drawpanel
+        game.checkHit();
         drawPanel1.repaint();
     }
     /**
@@ -40,27 +45,68 @@ public class MainFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         drawPanel1 = new view.DrawPanel();
+        mainMenuPanel1 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        startButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        drawPanel1.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                drawPanel1KeyPressed(evt);
-            }
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                drawPanel1KeyReleased(evt);
+        setTitle("Tank.io");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
+        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                formMouseMoved(evt);
             }
         });
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
+        addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                formKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                formKeyReleased(evt);
+            }
+        });
+
+        jLabel2.setFont(new java.awt.Font("Snap ITC", 1, 36)); // NOI18N
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Tank.io");
+
+        startButton.setFont(new java.awt.Font("Snap ITC", 1, 24)); // NOI18N
+        startButton.setText("Start");
+        startButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout mainMenuPanel1Layout = new javax.swing.GroupLayout(mainMenuPanel1);
+        mainMenuPanel1.setLayout(mainMenuPanel1Layout);
+        mainMenuPanel1Layout.setHorizontalGroup(
+            mainMenuPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
+            .addComponent(startButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        mainMenuPanel1Layout.setVerticalGroup(
+            mainMenuPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(mainMenuPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(startButton, javax.swing.GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout drawPanel1Layout = new javax.swing.GroupLayout(drawPanel1);
         drawPanel1.setLayout(drawPanel1Layout);
         drawPanel1Layout.setHorizontalGroup(
             drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addComponent(mainMenuPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         drawPanel1Layout.setVerticalGroup(
             drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addComponent(mainMenuPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -77,16 +123,53 @@ public class MainFrame extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void drawPanel1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_drawPanel1KeyPressed
-        // TODO add your handling code here:
-        player.keyPressed(evt);
-        System.out.println(evt);
-    }//GEN-LAST:event_drawPanel1KeyPressed
+    private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
+        // Pressed key
+        if(game !=null){
+            game.keyPressed(evt);
+        }
+    }//GEN-LAST:event_formKeyPressed
 
-    private void drawPanel1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_drawPanel1KeyReleased
-        // TODO add your handling code here:
-        player.keyReleased(evt);
-    }//GEN-LAST:event_drawPanel1KeyReleased
+    private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
+        // Releases key
+        if(game !=null){
+            game.keyReleased(evt);
+        }
+       
+    }//GEN-LAST:event_formKeyReleased
+
+    private void formMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseMoved
+        // Rotates the cannon when game is not null and player moves mouse
+        if(game !=null){
+            game.getPlayer().rotateCannon(evt.getPoint());
+        }
+       
+    }//GEN-LAST:event_formMouseMoved
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        // Shoot when game is not null and player clicks mouse
+        if(game !=null){
+            game.getPlayer().shoot();
+        }
+       
+    }//GEN-LAST:event_formMouseClicked
+
+    private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
+        // Sets mainmenu invisible and disables it
+        mainMenuPanel1.setVisible(false);
+        mainMenuPanel1.setEnabled(false);
+        // Sets drawpanel visible and enables it, transfers focus to top, maybe bug due to buttons and makes drawpanel start with max sizes
+        drawPanel1.setEnabled(true);
+        drawPanel1.setVisible(true);
+        drawPanel1.transferFocusUpCycle();
+        drawPanel1.setSize(Toolkit.getDefaultToolkit().getScreenSize().width, Toolkit.getDefaultToolkit().getScreenSize().height);
+        // Creates player ,game and sets it to the drawpanel
+        player = new Player(drawPanel1.getWidth()/2, drawPanel1.getHeight()/2);
+        game = new Game(player, drawPanel1.getWidth(), drawPanel1.getHeight());
+        drawPanel1.setGame(game);
+        // Starts timer
+        timer.start();
+    }//GEN-LAST:event_startButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -125,5 +208,8 @@ public class MainFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private view.DrawPanel drawPanel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel mainMenuPanel1;
+    private javax.swing.JButton startButton;
     // End of variables declaration//GEN-END:variables
 }

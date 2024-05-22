@@ -21,6 +21,7 @@ public class Projectile {
     private int speed = 5;
     private int r = 5;
     private long age;
+    private long decayTime = (long) (5*Math.pow(10, 9));
     private boolean decayed = false;
     
     public Projectile(double x,double y,double xDir, double yDir){
@@ -31,26 +32,36 @@ public class Projectile {
         age = System.nanoTime();
     }
     
-    private void move(int width, int height){
+    private void move(){
         
-        while(System.nanoTime()-age<=5*Math.pow(10, 9)){
+        if(System.nanoTime()-age<=decayTime){
             this.x=x+xDir*speed;
             this.y=y+yDir*speed;
         }
-        decayed = true;
-    }
-    
-    public void draw(Graphics g, int width, int height){
-        move(width, height);
-        
-        g.setColor(Color.white);
-        g.fillOval((int)(x-r), (int)(y-r), r, r);
+        else{
+            decayed = true;
+        }
     }
     
     public boolean checkHit(Point topLeft, int width, int height){
         boolean aBoolean = false;
         if(!((topLeft.y+height<y-r)||(topLeft.x>x+r)||(topLeft.y>y+r)||(topLeft.x+width<x)))
            aBoolean = true;
+        return aBoolean;
+    }
+    
+    public boolean isDecayed(){
+        return decayed;
+    }
+    
+    public void draw(Graphics g){
+        move();
+        g.setColor(Color.black);
+        g.fillOval((int)(x-r), (int)(y-r), r, r);
+    }
+    
+    public boolean checkHit(Point topLeft){
+        boolean aBoolean = false;
         return aBoolean;
     }
 }

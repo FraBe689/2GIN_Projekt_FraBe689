@@ -18,11 +18,11 @@ public class Cannon {
     private Point center;
     private double xDir = 0;
     private double yDir = -1;
-    private int length = 50;
+    private int length = 20;
     private ArrayList<Projectile> alProjectiles = new ArrayList<>();
     
-    public Cannon(int width, int height){
-        center = new Point(width/2, height);
+    public Cannon(int x, int y){
+        center = new Point(x, y);
     }
     
     public void rotate(int degrees){
@@ -48,23 +48,33 @@ public class Cannon {
         alProjectiles.add(new Projectile(getCannonTipX(),getCannonTipY(),xDir,yDir));
     }
     
-  /*  public boolean checkHit(Player player){
+    public boolean checkHit(ArrayList<Player> alEnemies){
         boolean aBoolean = false;
-        for(int i = 0; i < alProjectiles.size(); i++) {
-            if(alProjectiles.get(i).checkHit(player.getTopLeft(), player.getWidth(), player.getHeight())){
-                aBoolean = true;
-                alProjectiles.remove(i);
+        for(int i = 0; i < alEnemies.size(); i++){
+            for(int j = 0; j < alProjectiles.size(); j++) {
+                if(alProjectiles.get(j).checkHit(alEnemies.get(i).getTopLeft(), alEnemies.get(i).getRadius(), alEnemies.get(i).getRadius())){
+                    aBoolean = true;
+                    alProjectiles.remove(j);
+                }
             }
         }
         return aBoolean;
-    }*/
+    }
     
-    public void draw(Graphics g, int width, int height){
+    public void setCenter(Point center){
+        this.center = center;
+    }
+    
+    public void draw(Graphics g){
         for(int i =0; i<alProjectiles.size();i++){
-            alProjectiles.get(i).draw(g,width,height);
+            if(alProjectiles.get(i).isDecayed()){
+                alProjectiles.remove(i);
+            }
+        }
+        for(int i =0; i<alProjectiles.size();i++){
+            alProjectiles.get(i).draw(g);
         }
         g.setColor(Color.gray);
-        g.fillOval((int)center.getX()-length/2, (int)center.getY()-length/2, length, length);
         g.drawLine((int)center.getX(), (int)center.getY(), (int)getCannonTipX(), (int)getCannonTipY());
     }
 }

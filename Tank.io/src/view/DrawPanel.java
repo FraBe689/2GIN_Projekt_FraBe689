@@ -6,8 +6,7 @@ package view;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import model.Player;
-
+import model.Game;
 /**
  *
  * @author Lenovo
@@ -17,22 +16,22 @@ public class DrawPanel extends javax.swing.JPanel {
     /**
      * Creates new form DrawPanel
      */
-    private Player player;
+    private Game game;
     public DrawPanel() {
         initComponents();
     }
 
-    public void setPlayer(Player player){
-        this.player = player;
+    public void setGame(Game game){
+        this.game = game;
     }
     
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-        g.setColor(Color.white);
+        g.setColor(new Color(226, 219, 230));
         g.fillRect(0, 0, getWidth(), getHeight());
-        if(player != null){
-            player.draw(g);
+        if(game != null){
+            game.draw(g);
         }
     }
     
