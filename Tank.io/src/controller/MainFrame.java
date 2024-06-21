@@ -6,10 +6,8 @@ package controller;
 
 import java.awt.Toolkit;
 import javax.swing.Timer;
-import jdk.jshell.execution.Util;
 import model.Game;
 import model.Player;
-import model.Utils;
 
 /**
  *
@@ -22,18 +20,36 @@ public class MainFrame extends javax.swing.JFrame {
      */
     private Game game;
     private Player player; 
-    private Timer timer;
+    private final Timer timer;
+    
     public MainFrame() {
         initComponents();
-        timer = new Timer(20,evt-> updateView());
+        timer = new Timer(1000/240,evt-> updateView());
         // makes window fullscreen
         setExtendedState(MAXIMIZED_BOTH);
     }
-
+    
     private void updateView(){
         // Checks for hits and repaints drawpanel
-        game.checkHit();
         drawPanel1.repaint();
+        game.checkHit();
+        game.move();
+        // If game is over, stop the timer and show loosing screen
+        if(isGameOver() || isGameWon()){
+            timer.stop();
+            LoosingPanel.setEnabled(true);
+            LoosingPanel.setVisible(true);
+            killsLabel.setText(String.valueOf("Total kills: "+game.getScore()));
+        }
+        
+    }
+    
+    private boolean isGameOver(){
+        return game.isGameOver();
+    }
+    
+    private boolean isGameWon(){
+        return game.isGameWon();
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -48,26 +64,30 @@ public class MainFrame extends javax.swing.JFrame {
         mainMenuPanel1 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         startButton = new javax.swing.JButton();
+        LoosingPanel = new javax.swing.JPanel();
+        restartButton = new javax.swing.JButton();
+        killsLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Tank.io");
-        setCursor(new java.awt.Cursor(java.awt.Cursor.CROSSHAIR_CURSOR));
-        addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            public void mouseMoved(java.awt.event.MouseEvent evt) {
-                formMouseMoved(evt);
-            }
-        });
-        addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                formMouseClicked(evt);
-            }
-        });
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
             }
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 formKeyReleased(evt);
+            }
+        });
+
+        drawPanel1.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseMoved(java.awt.event.MouseEvent evt) {
+                drawPanel1MouseMoved(evt);
+            }
+        });
+        drawPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                drawPanel1MousePressed(evt);
             }
         });
 
@@ -87,7 +107,7 @@ public class MainFrame extends javax.swing.JFrame {
         mainMenuPanel1.setLayout(mainMenuPanel1Layout);
         mainMenuPanel1Layout.setHorizontalGroup(
             mainMenuPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 439, Short.MAX_VALUE)
+            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
             .addComponent(startButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         mainMenuPanel1Layout.setVerticalGroup(
@@ -98,15 +118,49 @@ public class MainFrame extends javax.swing.JFrame {
                 .addComponent(startButton, javax.swing.GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE))
         );
 
+        restartButton.setFont(new java.awt.Font("Snap ITC", 0, 18)); // NOI18N
+        restartButton.setText("Restart");
+        restartButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                restartButtonActionPerformed(evt);
+            }
+        });
+
+        killsLabel.setFont(new java.awt.Font("Snap ITC", 1, 36)); // NOI18N
+        killsLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+
+        javax.swing.GroupLayout LoosingPanelLayout = new javax.swing.GroupLayout(LoosingPanel);
+        LoosingPanel.setLayout(LoosingPanelLayout);
+        LoosingPanelLayout.setHorizontalGroup(
+            LoosingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(restartButton, javax.swing.GroupLayout.DEFAULT_SIZE, 504, Short.MAX_VALUE)
+            .addGroup(LoosingPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(killsLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        LoosingPanelLayout.setVerticalGroup(
+            LoosingPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, LoosingPanelLayout.createSequentialGroup()
+                .addGap(84, 84, 84)
+                .addComponent(killsLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 59, Short.MAX_VALUE)
+                .addGap(79, 79, 79)
+                .addComponent(restartButton, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout drawPanel1Layout = new javax.swing.GroupLayout(drawPanel1);
         drawPanel1.setLayout(drawPanel1Layout);
         drawPanel1Layout.setHorizontalGroup(
             drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(mainMenuPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(LoosingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         drawPanel1Layout.setVerticalGroup(
             drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(mainMenuPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(drawPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(LoosingPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -135,29 +189,15 @@ public class MainFrame extends javax.swing.JFrame {
         if(game !=null){
             game.keyReleased(evt);
         }
-       
     }//GEN-LAST:event_formKeyReleased
-
-    private void formMouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseMoved
-        // Rotates the cannon when game is not null and player moves mouse
-        if(game !=null){
-            game.getPlayer().rotateCannon(evt.getPoint());
-        }
-       
-    }//GEN-LAST:event_formMouseMoved
-
-    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
-        // Shoot when game is not null and player clicks mouse
-        if(game !=null){
-            game.getPlayer().shoot();
-        }
-       
-    }//GEN-LAST:event_formMouseClicked
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         // Sets mainmenu invisible and disables it
         mainMenuPanel1.setVisible(false);
         mainMenuPanel1.setEnabled(false);
+        // Sets losingPanel invisible and disables it
+        LoosingPanel.setVisible(false);
+        LoosingPanel.setEnabled(false);
         // Sets drawpanel visible and enables it, transfers focus to top, maybe bug due to buttons and makes drawpanel start with max sizes
         drawPanel1.setEnabled(true);
         drawPanel1.setVisible(true);
@@ -170,6 +210,23 @@ public class MainFrame extends javax.swing.JFrame {
         // Starts timer
         timer.start();
     }//GEN-LAST:event_startButtonActionPerformed
+
+    private void drawPanel1MouseMoved(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drawPanel1MouseMoved
+        if(game !=null){
+            game.getPlayer().rotateCannon(evt.getPoint());  
+        }
+    }//GEN-LAST:event_drawPanel1MouseMoved
+
+    private void drawPanel1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_drawPanel1MousePressed
+        if(game !=null){
+            game.getPlayer().shoot();  
+        }
+    }//GEN-LAST:event_drawPanel1MousePressed
+
+    private void restartButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restartButtonActionPerformed
+        // Calls the start method
+        startButtonActionPerformed(evt);
+    }//GEN-LAST:event_restartButtonActionPerformed
 
     /**
      * @param args the command line arguments
@@ -207,9 +264,12 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel LoosingPanel;
     private view.DrawPanel drawPanel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel killsLabel;
     private javax.swing.JPanel mainMenuPanel1;
+    private javax.swing.JButton restartButton;
     private javax.swing.JButton startButton;
     // End of variables declaration//GEN-END:variables
 }

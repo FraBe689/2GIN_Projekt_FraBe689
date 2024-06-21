@@ -6,7 +6,6 @@ package model;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -16,13 +15,17 @@ import java.awt.Point;
  */
 public class Player {
     protected int x,y;
-    protected int xDir,yDir;
-    private int radius = 10;
-    protected Color color1 = new Color(62,76,94);
-    protected Color color2 = new Color(44,61,85);
-    private final int speed = 1;
-    private int health = 100;
-    private Cannon cannon;
+    protected double xDir,yDir;
+    private final int radius = 15;
+
+    protected Color color1 = new Color(8,65,92);
+    protected Color color2 = new Color(98,144,200,30);
+    
+    private final int speed = 5;
+    protected int health = 400;
+    protected int maxHealth = 400;
+    private final Cannon cannon;
+    private long lastShot = 0;
     
     public Player(int x, int y){
         this.x = x;
@@ -30,11 +33,19 @@ public class Player {
         cannon = new Cannon(x, y);
     }
     
-    public int getxDir() {
+    public int getHealth(){
+        return health;
+    }
+    
+    public Point getCenter() {
+        return new Point(x,y);
+    }
+    
+    public double getxDir() {
         return xDir;
     }
 
-    public int getyDir() {
+    public double getyDir() {
         return yDir;
     }
 
@@ -47,23 +58,37 @@ public class Player {
     }
     
     public void move(){
-        x = x + xDir;
-        y = y + yDir;
+        double hyp = Math.sqrt(xDir*xDir + yDir*yDir);
+        if(hyp != 0) {
+            x = (int)Math.round(x + xDir/hyp*speed);
+            y = (int)Math.round(y + yDir/hyp*speed);
+        }
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
     
     public void rotateCannon(Point mouse){
         cannon.setDir(mouse.x, mouse.y);
     }
     
-    protected void setXDir(int xDir){
-        this.xDir = xDir;
+    protected void addXDir(int xDir){
+        this.xDir = this.xDir + xDir;
     }
-    protected void setYDir(int yDir){
-        this.yDir = yDir;
+    protected void addYDir(int yDir){
+        this.yDir = this.yDir + yDir;
     }
 
     public void shoot(){
-        cannon.shoot();
+        if(System.nanoTime()-lastShot > 2*Math.pow(10, 9)){
+            lastShot = System.nanoTime();
+            cannon.shoot();
+        }  
     }
     
     public int getRadius() {
@@ -79,18 +104,26 @@ public class Player {
     }
     public void draw(Graphics g){
         
-        
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(2));
+        g2d.setStroke(new BasicStroke(4));
+        
         cannon.setCenter(new Point(x,y));
         cannon.draw(g);
-        GradientPaint gradient = new GradientPaint(x-radius, y-radius, color1, x+radius, y+radius, color2);
-        g2d.setPaint(gradient);
-        g2d.fillOval(getTopLeft().x, getTopLeft().y, 2*radius, 2*radius);
+        
+        g.setColor(color1);
+        g.fillOval(getTopLeft().x, getTopLeft().y, 2*radius, 2*radius);
+        
+        int gradients = 15;
+        int gradientRadius = radius/gradients;
+        for (int i = gradients; i > 0; i--) {
+            g.setColor(color2);
+            g.fillOval(getTopLeft().x+radius-i*gradientRadius, getTopLeft().y+radius-i*gradientRadius, 2*i*gradientRadius, 2*i*gradientRadius);
+        }
+        
         g.setColor(Color.red);
         g.drawRect(x-radius, y+radius, radius*2, 2);
         g.setColor(Color.green);
-        g.drawRect(x-radius, y+radius, radius*2*health/100, 2);
+        g.drawRect(x-radius, y+radius, radius*2*health/maxHealth, 2);
         
     }
 }
